@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("./model/user");
+const Report = require("./model/report");
 const auth = require("./middleware/auth");
 
 const app = express();
@@ -16,10 +17,10 @@ app.use(express.json({ limit: "50mb" }));
 app.post("/register", async (req, res) => {
   try {
     // Get user input
-    const { name, email, password } = req.body;
+    const { username,  password , email, name } = req.body;
 
     // Validate user input
-    if (!(email && password && name)) {
+    if (!(email && password && username && name)) {
       res.status(400).send("All input is required");
     }
 
@@ -36,9 +37,10 @@ app.post("/register", async (req, res) => {
 
     // Create user in our database
     const user = await User.create({
-      name,
+      username,
       email: email.toLowerCase(), // sanitize: convert email to lowercase
       password: encryptedPassword,
+      name
     });
 
     // Create token
@@ -90,6 +92,34 @@ app.post("/login", async (req, res) => {
     else{
       res.status(400).send("Invalid Credentials");
     }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+//routes de accion
+
+app.post("/newreport", auth, async (req, res) => {
+  try {
+    // Get user input
+    const { username , title, description, images, category } = req.body;
+
+    // Validate user input
+    if (!(username && title && description && category)) {
+      res.status(400).send("All input is required");
+    }
+
+    // Create user in our database
+    const report = await Report.create({
+      username,
+      title,
+      description,
+      images:images,
+      category:category
+    });
+
+    // return new report
+    res.status(201).json(report);
   } catch (err) {
     console.log(err);
   }
