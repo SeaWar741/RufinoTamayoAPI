@@ -8,6 +8,7 @@ const path = require('path');
 
 const User = require("./model/user");
 const Report = require("./model/report");
+const Category = require("./model/category");
 const auth = require("./middleware/auth");
 const { uploadMiddleware, reportsPhotoFolder } = require('./middleware/upload');
 
@@ -102,7 +103,7 @@ app.post("/login/", async (req, res) => {
 });
 
 //routes de accion
-app.post("/newreport/", auth, uploadMiddleware.array('photo',10), async (req, res) => {
+app.post("/reports/new", auth, uploadMiddleware.array('photo',10), async (req, res) => {
   try {
     const imagesData = req.files
 
@@ -155,11 +156,149 @@ app.delete('/reports/:id', auth, async (req, res) => {
   }
 });
 
+app.put('/reports/:id', auth, uploadMiddleware.array('photo',10), async (req, res) => {
 
+  // Get user input
+  const imagesData = req.files
+  const id  = req.params.id;
+
+  try {
+
+      let report = await Report.findOne({ _id: id });
+      
+      const names = imagesData.map(({ filename }) => filename);
+
+      const { username , title, description, category, attentionDate } = JSON.parse(req.body.report);
+
+
+      if(username == report.username){
+
+        if (!report) {
+          names.forEach((element) => {
+            deletePhoto(element);
+          });
+
+          res.status(404).end(`Report with id ${id} does not exist in this dojo`);
+        }
+        else {
+          
+          if(username && attentionDate && !title && !description && !category && (names === undefined || names.length == 0)){
+            report.attentionDate = attentionDate
+
+            await report.save()
+            res.json(report)
+          }
+          else{
+
+            if(attentionDate != ""){
+              report.attentionDate = attentionDate
+            }
+            report.title = title
+            report.description = description
+            report.category = category
+
+            let previousImages = report.images
+            
+            if(req.files){
+              report.images = names
+
+              previousImages.forEach((element) => {
+                //console.log(element)
+                deletePhoto(element);
+              });
+            }
+
+            await report.save()
+            res.json(report)
+          }
+        }
+      }
+      else{
+        names.forEach((element) => {
+          deletePhoto(element);
+        });
+        res.status(400).send("Invalid Credentials");
+      }
+      
+  } catch (err) {
+      res.status(503).end(`Request for updating report ${id} caused an error`);
+      console.log(err.message);
+  }
+});
+
+
+
+app.post("/categories/new", auth, async (req, res) => {
+  try {
+    const {name, callToAction, campo } = req.body;
+
+    // Validate user input
+    if (!(name && callToAction && campo)) {
+      res.status(400).send("All input is required");
+    }
+
+    // Create user in our database
+    const category = await Category.create({
+      name:name,
+      callToAction:callToAction,  
+      campo:campo,
+    });
+    // return new category
+    res.status(201).json(category);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.delete('/categories/:id', auth, async (req, res) => {
+
+  // Get user input
+  const id  = req.params.id;
+
+  try {
+      let category = await Category.findOneAndDelete({ _id: id });
+      
+      res.json(category);
+  } catch (err) {
+      res.status(503).end(`Request for deleting category ${id} caused an error`);
+      console.log(err.message);
+  }
+});
+
+app.put('/categories/:id', auth, async (req, res) => {
+
+  // Get user input
+  const id  = req.params.id;
+
+  try {
+
+      let category = await Category.findOne({ _id: id });
+      
+
+
+      const {name, callToAction, campo } = req.body;
+      
+      if (!category) {
+        res.status(404).end(`Report with id ${id} does not exist in this dojo`);
+      }
+      else{
+        category.name = name
+        category.callToAction = callToAction
+        category.campo = campo
+      }
+
+      await category.save()
+      res.json(category)
+      
+  } catch (err) {
+      res.status(503).end(`Request for updating category ${id} caused an error`);
+      console.log(err.message);
+  }
+});
 
 
 //routes para obtener
-app.get('/reports/', auth, async (req, res) => {
+app.get('/reports/all', auth, async (req, res) => {
   try {
       let reports = await Report.find();
       //console.log('All reports were requested');
@@ -177,7 +316,7 @@ app.get('/reports/:id', auth, async (req, res) => {
 
   try {
       let report = await Report.findOne({ _id: id });
-      console.log('All reports were requested');
+      //console.log('All reports were requested');
       if (!report) {
         res.status(404).end(`report with id ${id} does not exist in this dojo`);
         //console.log(`report with id ${id} does not exist in this dojo`);
@@ -199,6 +338,37 @@ app.get('/reports/images/:photoPath', auth, (req, res) => {
 });
 
 
+app.get('/categories/all', auth, async (req, res) => {
+  try {
+      let categories = await Category.find();
+      //console.log('All reports were requested');
+      res.json(categories);
+  } catch (err) {
+      res.status(503).end(`Request for all categories caused an error`);
+      console.log(err.message);
+  }
+});
+
+app.get('/categories/:id', auth, async (req, res) => {
+
+  // Get user input
+  const id  = req.params.id;
+
+  try {
+      let category = await Category.findOne({ _id: id });
+      if (!category) {
+        res.status(404).end(`category with id ${id} does not exist in this dojo`);
+        //console.log(`category with id ${id} does not exist in this dojo`);
+      }
+      else {
+          //console.log(`Sending category info for ${category}`);
+          res.json(category);
+      }
+  } catch (err) {
+      res.status(503).end(`Request for all categories caused an error`);
+      //console.log(err.message);
+  }
+});
 
 
 //routes de pureba

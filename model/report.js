@@ -7,7 +7,7 @@ const reportSchema = new mongoose.Schema({
   title:{type:String, default: null},
   description:{type:String, default: null},
   images:{type:[String], default: null},
-  category: {type: Number, default: null},
+  category: {type: String, default: null},
 });
 
 module.exports = mongoose.model("report", reportSchema,'Reports');
