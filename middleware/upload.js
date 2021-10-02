@@ -1,9 +1,9 @@
 const multer = require('multer')
-const reportsPhotoFolder = 'reportsPhotos';
+const reportsPhotoFolder = 'images';
 
 const storageConfig = multer.diskStorage({
     destination: (req, file, callback) => {
-        // make sure to create a "reportsPhotos" folder before storing files
+        // make sure to create a "images" folder before storing files
         callback(null, reportsPhotoFolder);
     },
     filename: (req, file, callback) => {
