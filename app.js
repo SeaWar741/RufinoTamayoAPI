@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const User = require("./model/user");
 const Report = require("./model/report");
 const auth = require("./middleware/auth");
+const { uploadMiddleware, productsPhotoFolder } = require('./middleware/upload');
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.json({ limit: "50mb" }));
 
 //RUTAS (cambiar a router y exportar cada una de la carpeta routes)
 
-app.post("/register", async (req, res) => {
+app.post("/register/", async (req, res) => {
   try {
     // Get user input
     const { username,  password , email, name } = req.body;
@@ -61,7 +62,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login/", async (req, res) => {
   try {
     // Get user input
     const { email, password } = req.body;
@@ -98,8 +99,7 @@ app.post("/login", async (req, res) => {
 });
 
 //routes de accion
-
-app.post("/newreport", auth, async (req, res) => {
+app.post("/newreport/", auth, async (req, res) => {
   try {
     // Get user input
     const { username , title, description, images, category } = req.body;
@@ -124,6 +124,18 @@ app.post("/newreport", auth, async (req, res) => {
     console.log(err);
   }
 });
+
+app.get('/reports/', auth, async (req, res) => {
+  try {
+      let reports = await Report.find();
+      console.log('All reports were requested');
+      res.json(reports);
+  } catch (err) {
+      res.status(503).end(`Request for all reports caused an error`);
+      console.log(err.message);
+  }
+});
+
 
 app.get("/welcome", auth, (req, res) => {
   res.status(200).send("Welcome 🙌 ");
