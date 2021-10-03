@@ -10,6 +10,7 @@ const User = require("./model/user");
 const Report = require("./model/report");
 const Category = require("./model/category");
 const auth = require("./middleware/auth");
+const { sendEmail } = require("./helpers/mailer");
 const { uploadMiddleware, reportsPhotoFolder } = require('./middleware/upload');
 
 const app = express();
@@ -19,7 +20,7 @@ app.use(express.json({ limit: "50mb" }));
 
 //RUTAS (cambiar a router y exportar cada una de la carpeta routes)
 
-app.post("/register/", async (req, res) => {
+app.post("/users/register/", async (req, res) => {
   try {
     // Get user input
     const { username,  password , email, name } = req.body;
@@ -28,6 +29,7 @@ app.post("/register/", async (req, res) => {
     if (!(email && password && username && name)) {
       res.status(400).send("All input is required");
     }
+
 
     // check if user already exist
     // Validate if user exist in our database
@@ -66,7 +68,7 @@ app.post("/register/", async (req, res) => {
   }
 });
 
-app.post("/login/", async (req, res) => {
+app.post("/users/login/", async (req, res) => {
   try {
     // Get user input
     const { email, password } = req.body;
@@ -99,6 +101,99 @@ app.post("/login/", async (req, res) => {
     }
   } catch (err) {
     console.log(err);
+  }
+});
+
+app.post("/users/forgotpassword", async (req, res) => {
+  try {
+    // Get user input
+    const { email } = req.body;
+
+    // Validate user input
+    if (!(email)) {
+      res.status(400).send("All input is required");
+    }
+    // Validate if user exist in our database
+    const user = await User.findOne({ email:email });
+    
+    if(!user){
+      return res.send({
+        success: true,
+        message:
+          "If that email address is in our database, we will send you an email to reset your password",
+      });
+    }
+
+    let code = Math.floor(100000 + Math.random() * 900000);
+    let response = await sendEmail(user.email, code);
+
+    if (response.error) {
+      return res.status(500).json({
+        error: true,
+        message: "Couldn't send mail. Please try again later.",
+      });
+    }
+
+    let expiry = Date.now() + 60 * 1000 * 15;
+    user.resetPasswordToken = code;
+    user.resetPasswordExpires = expiry; // 15 minutes
+
+    await user.save();
+
+    return res.send({
+      success: true,
+      message:
+        "If that email address is in our database, we will send you an email to reset your password",
+    });
+    
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.post('/users/resetpassword/', async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(403).json({
+        error: true,
+        message:
+          "Couldn't process request. Please provide all mandatory fields",
+      });
+    }
+    const user = await User.findOne({
+      resetPasswordToken: req.body.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.send({
+        error: true,
+        message: "Password reset token is invalid or has expired.",
+      });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        error: true,
+        message: "Passwords didn't match",
+      });
+    }
+    encryptedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = encryptedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = "";
+
+    await user.save();
+
+    return res.send({
+      success: true,
+      message: "Password has been changed",
+    });
+  } catch (error) {
+    console.error("reset-password-error", error);
+    return res.status(500).json({
+      error: true,
+      message: error.message,
+    });
   }
 });
 
@@ -138,7 +233,7 @@ app.delete('/reports/:id', auth, async (req, res) => {
 
   try {
       let report = await Report.findOneAndDelete({ _id: id });
-      
+
       if (report.images) {
         report.images.forEach((element) => {
           //console.log(element)
@@ -170,8 +265,10 @@ app.put('/reports/:id', auth, uploadMiddleware.array('photo',10), async (req, re
 
       const { username , title, description, category, attentionDate } = JSON.parse(req.body.report);
 
-
-      if(username == report.username){
+      let rankUser = await User.findOne({username:username});
+      
+      //solo el usuario original puede modificarlo o si un admin lo intenta hacer
+      if(username == report.username || rankUser.type == "admin"){
 
         if (!report) {
           names.forEach((element) => {

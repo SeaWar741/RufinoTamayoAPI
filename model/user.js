@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
   newsletter: { type: Boolean, default: true },
   type: { type: String, default: "user" },
   token: { type: String },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
 });
 
 module.exports = mongoose.model("user", userSchema,'Users');

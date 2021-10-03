@@ -4,7 +4,7 @@ async function sendEmail(email, code) {
   try {
     const smtpEndpoint = "smtp.sendgrid.net";
     const port = 465;
-    const senderAddress = "a01652138@itesm.mx";
+    const senderAddress = "Parque Rufino Tamayo <"+process.env.SG_EMAIL+">";
     var toAddress = email;
     const smtpUsername = "apikey";
     const smtpPassword = process.env.SG_APIKEY;
