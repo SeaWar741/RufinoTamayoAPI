@@ -193,5 +193,8 @@ router.post('/resetpassword/', async (req, res) => {
     }
 });
 
+router.put('/update/:id',async(req,res) => {
+    console.log("por hacer")
+})
 
 module.exports = router;
