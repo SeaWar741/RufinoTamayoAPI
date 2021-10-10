@@ -140,6 +140,7 @@ try {
 });
 
 
+
 //routes para obtener
 router.get('/all', auth, async (req, res) => {
     try {
@@ -151,6 +152,30 @@ router.get('/all', auth, async (req, res) => {
         console.log(err.message);
     }
 });
+
+router.get('/userdata', auth, async (req, res) => {
+
+    // Get user input
+    const { username } = req.body;
+
+    try {
+        let report = await Report.find({ username: username });
+
+        if (!report) {
+            res.status(404).end(`report with id ${id} does not exist in this dojo`);
+            //console.log(`report with id ${id} does not exist in this dojo`);
+        }
+        else {
+            //console.log(`Sending report info for ${report}`);
+            res.json(report);
+        }
+    } catch (err) {
+        res.status(503).end(`Request for all reports of user caused an error`);
+        //console.log(err.message);
+    }
+});
+
+
 
 router.get('/:id', auth, async (req, res) => {
 
