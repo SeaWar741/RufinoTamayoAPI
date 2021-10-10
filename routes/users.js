@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/user");
 
 const { sendEmail } = require("../helpers/mailer");
+const auth = require("../middleware/auth");
 
 
 router.post("/register/", async (req, res) => {
@@ -193,8 +194,35 @@ router.post('/resetpassword/', async (req, res) => {
     }
 });
 
-router.put('/update/:id',async(req,res) => {
-    console.log("por hacer")
+router.get('/userdata/',auth, async(req,res) => {
+    try {
+        const { email,username} = req.body;
+
+        if (!email && !username) {
+            return res.status(403).json({
+            error: true,
+            message:
+                "Couldn't process request. Please provide all mandatory fields",
+            });
+        }
+        
+        const user = await User.findOne({ email: email, username:username });
+
+        if(!user){
+            res.status(404).end(`user does not exist in this dojo`);
+        }
+        else{
+            res.json(user);
+        }
+        
+    } catch (error) {
+        console.error("findUser error", error);
+        
+        return res.status(500).json({
+            error: true,
+            message: error.message,
+        });
+    }
 })
 
 module.exports = router;
