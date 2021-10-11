@@ -6,10 +6,15 @@ const usersRoutes = require("./routes/users");
 const reportsRoutes = require("./routes/reports");
 const categoriesRoutes = require("./routes/categories");
 const mongoSanitize = require('express-mongo-sanitize');
+const rateLimit = require("express-rate-limit");
 const xss = require('xss-clean');
-const limiter = require("./helpers/ratelimiter");
 
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
 
 
 //security
@@ -17,8 +22,10 @@ app.use(express.json({ limit: "50mb" }));
 
 app.use(xss());
 
-
 app.use(mongoSanitize());
+
+//  apply to all requests
+app.use(limiter);
 
 
 //functionality
