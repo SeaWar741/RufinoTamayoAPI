@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const path = require('path');
 const { uploadMiddleware, reportsPhotoFolder } = require('../middleware/upload');
