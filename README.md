@@ -1,6 +1,6 @@
 # **Rufino Tamayo API**
 
-[![License: Open Data Commons Attribution](https://img.shields.io/badge/License-ODC_BY-brightgreen.svg)](https://opendatacommons.org/licenses/by/)
+[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](https://unlicense.org/)
 [![Generic badge](https://img.shields.io/badge/Version-1.0-red.svg)](https://shields.io/)
 
 ## **Descripción general:**
@@ -58,9 +58,5 @@ Sin embargo, el servidor requiere de un archivo ***.env*** el cual contiene la i
 A continuación se muestra un link con la documentación comentada sobre las diferentes rutas de la API, esta se actualza a medida que se vea modificado el codigo. Las rutas estan puestas con localhost y el puerto 3000. Sin embargo, para el deployment y pruebas generales usar la IP publica del servidor donde ha sido alojado y el puerto (10017)
 
 **Link:** https://documenter.getpostman.com/view/15737721/UV5RkKwz
-
-
-## **Crear un Chron Job (Linux)**
-
 
 
