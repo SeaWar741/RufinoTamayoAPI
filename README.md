@@ -1,6 +1,7 @@
 # **Rufino Tamayo API**
 
 [![License: Open Data Commons Attribution](https://img.shields.io/badge/License-ODC_BY-brightgreen.svg)](https://opendatacommons.org/licenses/by/)
+[![Generic badge](https://img.shields.io/badge/Version-1.0-red.svg)](https://shields.io/)
 
 ## **Descripción general:**
 
@@ -60,4 +61,6 @@ A continuación se muestra un link con la documentación comentada sobre las dif
 
 
 ## **Crear un Chron Job (Linux)**
+
+
 
