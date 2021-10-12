@@ -1,8 +1,15 @@
 # **Rufino Tamayo API**
 
+[![License: Open Data Commons Attribution](https://img.shields.io/badge/License-ODC_BY-brightgreen.svg)](https://opendatacommons.org/licenses/by/)
+
 ## **Descripción general:**
 
 La API ha sido desarrollada como intermediario entre la aplicación de Android y la base de datos. En ella se hace toda la parte de la lógica de negocio, operaciones a los datos, lectura de información, gestión de usuarios, entre otros. A esta API se llega a traves de llamadas http en el lenguaje de su preferencia. Incluyendo headers para los tokens de autenticación
+
+## **Tecnologías utilizadas**
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 
 ## **Seguridad:**
 La API cuenta con medidas preventivas contra:
@@ -13,10 +20,12 @@ La API cuenta con medidas preventivas contra:
 - Ataques de inyección SQL/NoSQL 
 
 ## **Requsisitos:**
-- Node 14.4.0
+- Node >=14.4.0
 - Conexión a internet
 - Puerto 10017 abierto
 - 8GB de RAM
+
+**Recomendación*: Linux (Ubuntu, OpenSUSE,Arch,etc.)
 
 ## **Start Up**
 Para correr el servidor es necesario clonar el repositorio con el siguiente comando:
@@ -45,7 +54,10 @@ Sin embargo, el servidor requiere de un archivo ***.env*** el cual contiene la i
 
 
 ## **Documentación de rutas**
-A continuación se muestra un link con la documentación comentada sobre las diferentes rutas de la API, esta se actualza a medida que se vea modificado el codigo. Las rutas estan puestas con localhost y el puerto 3000. Sin embargo, para el deployment y pruebas generales usar la IP publica del servidor donde ha sido alojado y el puerto (10017).
+A continuación se muestra un link con la documentación comentada sobre las diferentes rutas de la API, esta se actualza a medida que se vea modificado el codigo. Las rutas estan puestas con localhost y el puerto 3000. Sin embargo, para el deployment y pruebas generales usar la IP publica del servidor donde ha sido alojado y el puerto (10017)
 
 **Link:** https://documenter.getpostman.com/view/15737721/UV5RkKwz
+
+
+## **Crear un Chron Job (Linux)**
 
