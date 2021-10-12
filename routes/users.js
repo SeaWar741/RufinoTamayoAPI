@@ -196,7 +196,7 @@ router.post('/resetpassword/', async (req, res) => {
 
 router.get('/userdata/',auth, async(req,res) => {
     try {
-        const { email,username} = req.body;
+        const { email,username} = req.query;
 
         if (!email && !username) {
             return res.status(403).json({

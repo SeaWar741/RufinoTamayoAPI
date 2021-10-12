@@ -23,7 +23,7 @@ router.post("/new", auth, uploadMiddleware.array('photo',10), async (req, res) =
       const { username , title, description, images, category } = JSON.parse(req.body.report);
   
       // Validate user input
-      if (!(username && title && description && category)) {
+      while (!(username && title && description && category)) {
         res.status(400).send("All input is required");
       }
   
@@ -77,7 +77,9 @@ try {
 
     let report = await Report.findOne({ _id: id });
     
+    
     const names = imagesData.map(({ filename }) => filename);
+    
 
     const { username , title, description, category, attentionDate } = JSON.parse(req.body.report);
 
@@ -87,43 +89,43 @@ try {
     if(username == report.username || rankUser.type == "admin"){
 
         if (!report) {
-        names.forEach((element) => {
-            deletePhoto(element);
-        });
+            names.forEach((element) => {
+                deletePhoto(element);
+            });
 
-        res.status(404).end(`Report with id ${id} does not exist in this dojo`);
+            res.status(404).end(`Report with id ${id} does not exist in this dojo`);
         }
         else {
         
-        if(username && attentionDate && !title && !description && !category && (names === undefined || names.length == 0)){
-            report.attentionDate = attentionDate
-
-            await report.save()
-            res.json(report)
-        }
-        else{
-
-            if(attentionDate != ""){
+            if(username && attentionDate && !title && !description && !category && (names === undefined || names.length == 0)){
                 report.attentionDate = attentionDate
+
+                await report.save()
+                res.json(report)
             }
-            report.title = title
-            report.description = description
-            report.category = category
+            else{
 
-            let previousImages = report.images
-            
-            if(req.files){
-            report.images = names
+                if(attentionDate != ""){
+                    report.attentionDate = attentionDate
+                }
+                report.title = title
+                report.description = description
+                report.category = category
 
-            previousImages.forEach((element) => {
-                //console.log(element)
-                deletePhoto(element);
-            });
+                let previousImages = report.images
+                
+                if(req.files){
+                report.images = names
+
+                previousImages.forEach((element) => {
+                    //console.log(element)
+                    deletePhoto(element);
+                });
+                }
+
+                await report.save()
+                res.json(report)
             }
-
-            await report.save()
-            res.json(report)
-        }
         }
     }
     else{
@@ -201,7 +203,7 @@ router.get('/:id', auth, async (req, res) => {
 
 router.get('/images/:photoPath', auth, (req, res) => {
     let photoPath = req.params.photoPath;
-    let fullPath = path.join(__dirname + `/${reportsPhotoFolder}/` + photoPath)
+    let fullPath = path.join(__dirname.slice(0,-6) + `/${reportsPhotoFolder}/` + photoPath)
     res.sendFile(fullPath);
 });
 
