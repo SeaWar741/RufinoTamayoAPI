@@ -8,6 +8,8 @@ const reportSchema = new mongoose.Schema({
   description:{type:String, default: null},
   images:{type:[String], default: null},
   category: {type: String, default: null},
+  lat:{type:String,default:null},
+  long:{type:String,default:null}
 });
 
 module.exports = mongoose.model("report", reportSchema,'Reports');

@@ -20,7 +20,7 @@ router.post("/new", auth, uploadMiddleware.array('photo',10), async (req, res) =
   
       const names = imagesData.map(({ filename }) => filename);
   
-      const { username , title, description, images, category } = JSON.parse(req.body.report);
+      const { username , title, description, images, category,lat,long } = JSON.parse(req.body.report);
   
       // Validate user input
       if (!(username && title && description && category)) {
@@ -33,7 +33,9 @@ router.post("/new", auth, uploadMiddleware.array('photo',10), async (req, res) =
         title,
         description,
         images:names,
-        category:category
+        category:category,
+        lat:lat,
+        long:long
       });
       // return new report
       res.status(201).json(report);
@@ -69,74 +71,79 @@ try {
 
 router.put('/:id', auth, uploadMiddleware.array('photo',10), async (req, res) => {
 
-// Get user input
-const imagesData = req.files
-const id  = req.params.id;
+    // Get user input
+    const imagesData = req.files
+    const id  = req.params.id;
 
-try {
+    try {
 
-    let report = await Report.findOne({ _id: id });
-    
-    const names = imagesData.map(({ filename }) => filename);
-
-    const { username , title, description, category, attentionDate } = JSON.parse(req.body.report);
-
-    let rankUser = await User.findOne({username:username});
-    
-    //solo el usuario original puede modificarlo o si un admin lo intenta hacer
-    if(username == report.username || rankUser.type == "admin"){
-
-        if (!report) {
-        names.forEach((element) => {
-            deletePhoto(element);
-        });
-
-        res.status(404).end(`Report with id ${id} does not exist in this dojo`);
-        }
-        else {
+        let report = await Report.findOne({ _id: id });
         
-        if(username && attentionDate && !title && !description && !category && (names === undefined || names.length == 0)){
-            report.attentionDate = attentionDate
+        const names = imagesData.map(({ filename }) => filename);
 
-            await report.save()
-            res.json(report)
-        }
-        else{
+        const { username , title, description, category, attentionDate,lat,long } = JSON.parse(req.body.report);
 
-            if(attentionDate != ""){
-                report.attentionDate = attentionDate
-            }
-            report.title = title
-            report.description = description
-            report.category = category
+        let rankUser = await User.findOne({username:username});
+        
+        //solo el usuario original puede modificarlo o si un admin lo intenta hacer
+        if(username == report.username || rankUser.type == "admin"){
 
-            let previousImages = report.images
-            
-            if(req.files){
-            report.images = names
-
-            previousImages.forEach((element) => {
-                //console.log(element)
+            if (!report) {
+            names.forEach((element) => {
                 deletePhoto(element);
             });
-            }
 
-            await report.save()
-            res.json(report)
+            res.status(404).end(`Report with id ${id} does not exist in this dojo`);
+            }
+            else {
+            
+            if(username && attentionDate && !title && !description && !category && (names === undefined || names.length == 0)){
+                report.attentionDate = attentionDate
+
+                await report.save()
+                res.json(report)
+            }
+            else{
+
+                if(attentionDate != ""){
+                    report.attentionDate = attentionDate
+                }
+                report.title = title
+                report.description = description
+                report.category = category
+                
+                if(lat != "" && long !=""){
+                    report.lat = lat
+                    report.long = long
+                }
+
+                let previousImages = report.images
+                
+                if(req.files){
+                report.images = names
+
+                previousImages.forEach((element) => {
+                    //console.log(element)
+                    deletePhoto(element);
+                });
+                }
+
+                await report.save()
+                res.json(report)
+            }
+            }
         }
+        else{
+            names.forEach((element) => {
+            deletePhoto(element);
+            });
+            res.status(400).send("Invalid Credentials");
         }
+        
+    } catch (err) {
+        res.status(503).end(`Request for updating report ${id} caused an error`);
+        console.log(err.message);
     }
-    else{
-        names.forEach((element) => {
-        deletePhoto(element);
-        });
-        res.status(400).send("Invalid Credentials");
-    }
-    
-} catch (err) {
-    res.status(503).end(`Request for updating report ${id} caused an error`);
-    console.log(err.message);
-}
 });
 
 
